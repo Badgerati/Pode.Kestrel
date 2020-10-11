@@ -16,15 +16,17 @@ namespace PodeKestrel
         public bool IsListening { get; private set; }
         public bool ErrorLoggingEnabled { get; set; }
         public CancellationToken CancellationToken { get; private set; }
+        public PodeListenerType Type { get; private set; }
 
         private IList<PodeSocket> Sockets;
         private BlockingCollection<PodeContext> Contexts;
         private WebHostBuilder WebBuilder;
         private IWebHost WebHost;
 
-        public PodeListener(CancellationToken cancellationToken)
+        public PodeListener(CancellationToken cancellationToken, PodeListenerType type = PodeListenerType.Http)
         {
             CancellationToken = cancellationToken;
+            Type = type;
 
             WebBuilder = new WebHostBuilder();
             WebBuilder.ConfigureServices(s => s.AddRouting());
