@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -50,6 +52,17 @@ namespace PodeKestrel
 
         public void Add(PodeSocket socket)
         {
+            // if this socket has a hostname, try to re-use an existing socket
+            if (socket.HasHostnames)
+            {
+                var foundSocket = Sockets.FirstOrDefault(x => x.Equals(socket));
+                if (foundSocket != default(PodeSocket))
+                {
+                    foundSocket.Hostnames.AddRange(socket.Hostnames);
+                    return;
+                }
+            }
+
             socket.BindListener(this);
             Sockets.Add(socket);
         }
@@ -84,6 +97,11 @@ namespace PodeKestrel
             WebHost = WebBuilder.Build();
             WebHost.RunAsync(CancellationToken);
             IsListening = true;
+        }
+
+        public PodeSocket FindSocket(IPEndPoint ipEndpoint)
+        {
+            return Sockets.FirstOrDefault(x => x.Equals(ipEndpoint));
         }
 
         public void Dispose()
