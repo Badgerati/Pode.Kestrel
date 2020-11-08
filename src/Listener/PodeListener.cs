@@ -16,6 +16,7 @@ namespace PodeKestrel
     public class PodeListener : IDisposable
     {
         public bool IsListening { get; private set; }
+        public bool IsDisposed { get; private set; }
         public bool ErrorLoggingEnabled { get; set; }
         public CancellationToken CancellationToken { get; private set; }
         public PodeListenerType Type { get; private set; }
@@ -28,6 +29,7 @@ namespace PodeKestrel
         public PodeListener(CancellationToken cancellationToken, PodeListenerType type = PodeListenerType.Http)
         {
             CancellationToken = cancellationToken;
+            IsDisposed = false;
             Type = type;
 
             WebBuilder = new WebHostBuilder();
@@ -108,6 +110,7 @@ namespace PodeKestrel
         {
             IsListening = false;
             WebHost.Dispose();
+            IsDisposed = true;
         }
     }
 }
