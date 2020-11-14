@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -14,17 +16,21 @@ namespace PodeKestrel
     public class PodeListener : IDisposable
     {
         public bool IsListening { get; private set; }
+        public bool IsDisposed { get; private set; }
         public bool ErrorLoggingEnabled { get; set; }
         public CancellationToken CancellationToken { get; private set; }
+        public PodeListenerType Type { get; private set; }
 
         private IList<PodeSocket> Sockets;
         private BlockingCollection<PodeContext> Contexts;
         private WebHostBuilder WebBuilder;
         private IWebHost WebHost;
 
-        public PodeListener(CancellationToken cancellationToken)
+        public PodeListener(CancellationToken cancellationToken, PodeListenerType type = PodeListenerType.Http)
         {
             CancellationToken = cancellationToken;
+            IsDisposed = false;
+            Type = type;
 
             WebBuilder = new WebHostBuilder();
             WebBuilder.ConfigureServices(s => s.AddRouting());
@@ -48,6 +54,17 @@ namespace PodeKestrel
 
         public void Add(PodeSocket socket)
         {
+            // if this socket has a hostname, try to re-use an existing socket
+            if (socket.HasHostnames)
+            {
+                var foundSocket = Sockets.FirstOrDefault(x => x.Equals(socket));
+                if (foundSocket != default(PodeSocket))
+                {
+                    foundSocket.Hostnames.AddRange(socket.Hostnames);
+                    return;
+                }
+            }
+
             socket.BindListener(this);
             Sockets.Add(socket);
         }
@@ -84,10 +101,16 @@ namespace PodeKestrel
             IsListening = true;
         }
 
+        public PodeSocket FindSocket(IPEndPoint ipEndpoint)
+        {
+            return Sockets.FirstOrDefault(x => x.Equals(ipEndpoint));
+        }
+
         public void Dispose()
         {
             IsListening = false;
             WebHost.Dispose();
+            IsDisposed = true;
         }
     }
 }

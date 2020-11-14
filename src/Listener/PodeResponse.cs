@@ -30,11 +30,13 @@ namespace PodeKestrel
         public bool SendChunked { get; set; }
 
         private HttpResponse Response;
+        private PodeContext Context;
 
 
-        public PodeResponse(HttpResponse response)
+        public PodeResponse(HttpResponse response, PodeContext context)
         {
             Response = response;
+            Context = context;
             Headers = new PodeResponseHeaders(response.Headers);
         }
 

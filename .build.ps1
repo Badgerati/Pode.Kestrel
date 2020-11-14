@@ -67,6 +67,35 @@ task BuildDeps {
     }
 }
 
+<#
+# Packaging
+#>
+
+# Synopsis: Package up the Module
+task Pack -If (Test-PodeBuildIsWindows) Build, {
+    $path = './pkg'
+    if (Test-Path $path) {
+        Remove-Item -Path $path -Recurse -Force | Out-Null
+    }
+
+    # create the pkg dir
+    New-Item -Path $path -ItemType Directory -Force | Out-Null
+
+    # which folders do we need?
+    $folders = @('Public', 'Libs')
+
+    # create the directories, then copy the source
+    $folders | ForEach-Object {
+        New-Item -ItemType Directory -Path (Join-Path $path $_) -Force | Out-Null
+        Copy-Item -Path "./src/$($_)/*" -Destination (Join-Path $path $_) -Force | Out-Null
+    }
+
+    # copy general files
+    Copy-Item -Path ./src/Pode.Kestrel.psm1 -Destination $path -Force | Out-Null
+    Copy-Item -Path ./src/Pode.Kestrel.psd1 -Destination $path -Force | Out-Null
+    Copy-Item -Path ./LICENSE.txt -Destination $path -Force | Out-Null
+}
+
 
 <#
 # Building
@@ -82,7 +111,15 @@ task Build BuildDeps, {
 
     try {
         dotnet build --configuration Release
+        if (!$?) {
+            throw 'Build Failed'
+        }
+
         dotnet publish --configuration Release --self-contained --output ../Libs
+        if (!$?) {
+            throw 'Publish Failed'
+        }
+
         exec { nuget install Microsoft.AspNetCore.App -Version 2.2.5 -OutputDirectory ../Listener/nuget }
         (Get-ChildItem ../Listener/nuget -Filter *.dll -Recurse) | ForEach-Object { Copy-Item -Path $_.FullName -Destination ../Libs -Force }
     }

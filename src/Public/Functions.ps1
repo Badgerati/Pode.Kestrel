@@ -6,10 +6,14 @@ function New-PodeKestrelListener
     param(
         [Parameter(Mandatory=$true)]
         [System.Threading.CancellationToken]
-        $CancellationToken
+        $CancellationToken,
+
+        [Parameter(Mandatory=$true)]
+        [PodeListenerType]
+        $Type
     )
 
-    return [PodeListener]::new($CancellationToken)
+    return [PodeListener]::new($CancellationToken, $Type)
 }
 
 function New-PodeKestrelListenerSocket
