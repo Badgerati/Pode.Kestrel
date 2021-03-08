@@ -21,6 +21,7 @@ namespace PodeKestrel
         public string UserAgent => (Request.Headers.ContainsKey("User-Agent") ? (string)Request.Headers["User-Agent"] : string.Empty);
         public string UrlReferrer => (Request.Headers.ContainsKey("Referer") ? (string)Request.Headers["Referer"] : string.Empty);
         public string Body => ReadBody();
+        public PodeForm Form => (new PodeForm(Request.Form));
         public Stream InputStream => Request.Body;
         public X509Certificate2 ClientCertificate => Request.HttpContext.Connection.ClientCertificate;
 
@@ -60,6 +61,8 @@ namespace PodeKestrel
 
             Error = default(HttpRequestException);
         }
+
+        public void ParseFormData() { }
 
         private string ReadBody()
         {

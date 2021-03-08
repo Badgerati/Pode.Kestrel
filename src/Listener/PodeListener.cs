@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace PodeKestrel
 {
@@ -33,7 +34,14 @@ namespace PodeKestrel
             Type = type;
 
             WebBuilder = new WebHostBuilder();
-            WebBuilder.ConfigureServices(s => s.AddRouting());
+
+            WebBuilder.ConfigureServices(services => {
+                services.AddRouting();
+                services.Configure<FormOptions>(options => {
+                    options.MultipartBodyLengthLimit = 268435456;
+                });
+            });
+
             WebBuilder.Configure(app => {
                 var routeHandler = new RouteHandler(ctx => {
                     var _podeContext = new PodeContext(ctx, this);
@@ -94,6 +102,8 @@ namespace PodeKestrel
                 {
                     socket.Listen(options);
                 }
+
+                options.Limits.MaxRequestBodySize = null;
             });
 
             WebHost = WebBuilder.Build();

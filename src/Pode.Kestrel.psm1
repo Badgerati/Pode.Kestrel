@@ -8,7 +8,7 @@ if ([string]::IsNullOrWhiteSpace($env:ASPNETCORE_SUPPRESSSTATUSMESSAGES)) {
 # load binaries
 Add-Type -AssemblyName System.Web
 Add-Type -AssemblyName System.Net.Http
-Add-Type -LiteralPath "$($root)/Libs/Listener.dll"
+Add-Type -LiteralPath "$($root)/Libs/Listener.dll" -ErrorAction Stop
 
 # load public functions
 $sysfuncs = Get-ChildItem Function:

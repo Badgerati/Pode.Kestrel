@@ -40,7 +40,7 @@ namespace PodeKestrel
             ContextTask = new Task(() => {
                 try
                 {
-                    var _task = Task.Delay(30000, ContextCancellationToken.Token);
+                    var _task = Task.Delay(300000, ContextCancellationToken.Token);
                     _task.Wait();
                     Response.Close();
                     ContextCancellationToken.Cancel();
