@@ -30,5 +30,13 @@ namespace PodeKestrel
                 return stream.ToArray();
             }
         }
+
+        public void Save(string path)
+        {
+            using (var file = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                FormFile.CopyTo(file);
+            }
+        }
     }
 }
