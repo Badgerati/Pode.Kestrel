@@ -27,6 +27,26 @@ namespace PodeKestrel
         private WebHostBuilder WebBuilder;
         private IWebHost WebHost;
 
+        private int _requestTimeout = 30;
+        public int RequestTimeout
+        {
+            get => _requestTimeout;
+            set
+            {
+                _requestTimeout = value <= 0 ? 30 : value;
+            }
+        }
+
+        private long _requestBodySize = 104857600; // 100MB
+        public long RequestBodySize
+        {
+            get => _requestBodySize;
+            set
+            {
+                _requestBodySize = value <= 0 ? 104857600 : value;
+            }
+        }
+
         public PodeListener(CancellationToken cancellationToken, PodeListenerType type = PodeListenerType.Http)
         {
             CancellationToken = cancellationToken;
@@ -38,7 +58,7 @@ namespace PodeKestrel
             WebBuilder.ConfigureServices(services => {
                 services.AddRouting();
                 services.Configure<FormOptions>(options => {
-                    options.MultipartBodyLengthLimit = int.MaxValue;
+                    options.MultipartBodyLengthLimit = this.RequestBodySize;
                 });
             });
 
@@ -103,7 +123,7 @@ namespace PodeKestrel
                     socket.Listen(options);
                 }
 
-                options.Limits.MaxRequestBodySize = null;
+                options.Limits.MaxRequestBodySize = this.RequestBodySize;
             });
 
             WebHost = WebBuilder.Build();
