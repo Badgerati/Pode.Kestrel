@@ -12,14 +12,14 @@ namespace PodeKestrel
 {
     public class PodeRequest
     {
-        public string HttpMethod => Request.Method;
-        public string Host => Request.Host.Value;
-        public string ContentType => Request.ContentType;
-        public string Protocol => Request.Scheme;
-        public string ProtocolVersion => (Request.Protocol.Split('/')[1]);
+        public string HttpMethod { get; private set; }
+        public string Host { get; private set; }
+        public string ContentType { get; private set; }
+        public string Protocol { get; private set; }
+        public string ProtocolVersion { get; private set; }
         public Encoding ContentEncoding => System.Text.Encoding.UTF8;
-        public string UserAgent => (Request.Headers.ContainsKey("User-Agent") ? (string)Request.Headers["User-Agent"] : string.Empty);
-        public string UrlReferrer => (Request.Headers.ContainsKey("Referer") ? (string)Request.Headers["Referer"] : string.Empty);
+        public string UserAgent { get; private set; }
+        public string UrlReferrer { get; private set; }
         public string Body => ReadBody();
         public PodeForm Form => (new PodeForm(Request.Form));
         public Stream InputStream => Request.Body;
@@ -41,24 +41,37 @@ namespace PodeKestrel
             Request = request;
             Context = context;
 
+            // default values
+            HttpMethod = Request.Method;
+            Host = Request.Host.Value;
+            ContentType = Request.ContentType;
+            Protocol = Request.Scheme;
+            ProtocolVersion = (Request.Protocol.Split('/')[1]);
+            UserAgent = Request.Headers.ContainsKey("User-Agent") ? (string)Request.Headers["User-Agent"] : string.Empty;
+            UrlReferrer = Request.Headers.ContainsKey("Referer") ? (string)Request.Headers["Referer"] : string.Empty;
+
+            // protocol and url
             var _proto = (Request.IsHttps ? "https" : "http");
             Url = new Uri($"{_proto}://{Host}{Request.Path.Value}");
 
             RemoteEndpoint = new IPEndPoint(Request.HttpContext.Connection.RemoteIpAddress, Request.HttpContext.Connection.RemotePort);
             LocalEndpoint = new IPEndPoint(Request.HttpContext.Connection.LocalIpAddress, Request.HttpContext.Connection.LocalPort);
 
+            // query string
             QueryString = new NameValueCollection();
             foreach (var key in Request.Query.Keys)
             {
                 QueryString.Add(key, Request.Query[key]);
             }
 
+            // headers
             Headers = new Hashtable();
             foreach (var key in Request.Headers.Keys)
             {
                 Headers.Add(key, Request.Headers[key]);
             }
 
+            // reset error
             Error = default(HttpRequestException);
         }
 

@@ -36,14 +36,29 @@ namespace PodeKestrel
                 Request.Error = new HttpRequestException($"Invalid request Host: {Request.Host}");
             }
 
+            if (ContextCancellationToken != default(CancellationTokenSource))
+            {
+                ContextCancellationToken.Dispose();
+            }
+
             ContextCancellationToken = new CancellationTokenSource();
+
+            if (ContextTask != default(Task))
+            {
+                ContextTask.Dispose();
+            }
+
             ContextTask = new Task(() => {
                 try
                 {
                     var _task = Task.Delay(Listener.RequestTimeout * 1000, ContextCancellationToken.Token);
                     _task.Wait();
-                    Response.Close();
-                    ContextCancellationToken.Cancel();
+
+                    Response.StatusCode = 408;
+                    Request.Error = new HttpRequestException("Request timeout");
+                    Request.Error.Data.Add("PodeStatusCode", 408);
+
+                    this.Dispose();
                 }
                 catch {}
             });
