@@ -22,20 +22,32 @@ namespace PodeKestrel
 
         public PodeContext(HttpContext context, PodeListener listener)
         {
+            // set id/timestamp
             ID = PodeHelpers.NewGuid();
             Context = context;
             Listener = listener;
             Timestamp = DateTime.UtcNow;
 
+            // build req/resp mappers
             Request = new PodeRequest(context.Request, this);
             Response = new PodeResponse(context.Response, this);
 
+            // is the body too big?
+            if (Request.ContentLength > Listener.RequestBodySize)
+            {
+                Response.StatusCode = 413;
+                Request.Error = new HttpRequestException("Payload too large");
+                Request.Error.Data.Add("PodeStatusCode", 413);
+            }
+
+            // check hostname
             PodeSocket = Listener.FindSocket(Request.LocalEndpoint);
             if (PodeSocket != default(PodeSocket) && !PodeSocket.CheckHostname(Request.Host))
             {
                 Request.Error = new HttpRequestException($"Invalid request Host: {Request.Host}");
             }
 
+            // configure req timeout
             if (ContextCancellationToken != default(CancellationTokenSource))
             {
                 ContextCancellationToken.Dispose();

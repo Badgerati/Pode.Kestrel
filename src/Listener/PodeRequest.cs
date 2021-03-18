@@ -15,6 +15,7 @@ namespace PodeKestrel
         public string HttpMethod { get; private set; }
         public string Host { get; private set; }
         public string ContentType { get; private set; }
+        public long ContentLength { get; private set; }
         public string Protocol { get; private set; }
         public string ProtocolVersion { get; private set; }
         public Encoding ContentEncoding => System.Text.Encoding.UTF8;
@@ -45,6 +46,7 @@ namespace PodeKestrel
             HttpMethod = Request.Method;
             Host = Request.Host.Value;
             ContentType = Request.ContentType;
+            ContentLength = Request.ContentLength.HasValue ? Request.ContentLength.Value : 0;
             Protocol = Request.Scheme;
             ProtocolVersion = (Request.Protocol.Split('/')[1]);
             UserAgent = Request.Headers.ContainsKey("User-Agent") ? (string)Request.Headers["User-Agent"] : string.Empty;
