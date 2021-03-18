@@ -11,8 +11,11 @@ namespace PodeKestrel
             get => _statusCode;
             set
             {
-                _statusCode = value;
-                Response.StatusCode = value;
+                if (!Sent)
+                {
+                    _statusCode = value;
+                    Response.StatusCode = value;
+                }
             }
         }
 
@@ -22,8 +25,11 @@ namespace PodeKestrel
             get => _contentLength;
             set
             {
-                _contentLength = value;
-                Response.ContentLength = value;
+                if (!Sent)
+                {
+                    _contentLength = value;
+                    Response.ContentLength = value;
+                }
             }
         }
 
@@ -33,10 +39,15 @@ namespace PodeKestrel
             get => _contentType;
             set
             {
-                _contentType = value;
-                Response.ContentType = value;
+                if (!Sent)
+                {
+                    _contentType = value;
+                    Response.ContentType = value;
+                }
             }
         }
+
+        public bool Sent => Response.HasStarted;
 
         public Stream OutputStream { get; private set; }
         public PodeResponseHeaders Headers { get; private set; }

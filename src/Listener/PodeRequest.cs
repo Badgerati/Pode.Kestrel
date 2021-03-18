@@ -32,6 +32,7 @@ namespace PodeKestrel
         public NameValueCollection QueryString { get; private set; }
         public Hashtable Headers { get; private set; }
         public HttpRequestException Error { get; set; }
+        public bool IsAborted => (Error != default(HttpRequestException));
 
         private HttpRequest Request;
         private PodeContext Context;
