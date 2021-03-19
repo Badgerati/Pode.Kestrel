@@ -22,28 +22,55 @@ namespace PodeKestrel
 
         public PodeContext(HttpContext context, PodeListener listener)
         {
+            // set id/timestamp
             ID = PodeHelpers.NewGuid();
             Context = context;
             Listener = listener;
             Timestamp = DateTime.UtcNow;
 
+            // build req/resp mappers
             Request = new PodeRequest(context.Request, this);
             Response = new PodeResponse(context.Response, this);
 
+            // is the body too big?
+            if (Request.ContentLength > Listener.RequestBodySize)
+            {
+                Response.StatusCode = 413;
+                Request.Error = new HttpRequestException("Payload too large");
+                Request.Error.Data.Add("PodeStatusCode", 413);
+            }
+
+            // check hostname
             PodeSocket = Listener.FindSocket(Request.LocalEndpoint);
             if (PodeSocket != default(PodeSocket) && !PodeSocket.CheckHostname(Request.Host))
             {
                 Request.Error = new HttpRequestException($"Invalid request Host: {Request.Host}");
             }
 
+            // configure req timeout
+            if (ContextCancellationToken != default(CancellationTokenSource))
+            {
+                ContextCancellationToken.Dispose();
+            }
+
             ContextCancellationToken = new CancellationTokenSource();
+
+            if (ContextTask != default(Task))
+            {
+                ContextTask.Dispose();
+            }
+
             ContextTask = new Task(() => {
                 try
                 {
-                    var _task = Task.Delay(30000, ContextCancellationToken.Token);
+                    var _task = Task.Delay(Listener.RequestTimeout * 1000, ContextCancellationToken.Token);
                     _task.Wait();
-                    Response.Close();
-                    ContextCancellationToken.Cancel();
+
+                    Response.StatusCode = 408;
+                    Request.Error = new HttpRequestException("Request timeout");
+                    Request.Error.Data.Add("PodeStatusCode", 408);
+
+                    this.Dispose();
                 }
                 catch {}
             });
