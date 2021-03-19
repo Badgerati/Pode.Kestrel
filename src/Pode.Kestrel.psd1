@@ -11,7 +11,7 @@
     RootModule = 'Pode.Kestrel.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.0.0'
+    ModuleVersion = '1.1.0'
 
     # ID used to uniquely identify this module
     GUID = '4c6cae5a-8e62-48a2-b2e5-7511ffe2d438'
