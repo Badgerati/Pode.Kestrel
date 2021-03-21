@@ -5,25 +5,51 @@ namespace PodeKestrel
 {
     public class PodeResponse
     {
+        private int _statusCode = 200;
         public int StatusCode
         {
-            get => Response.StatusCode;
-            set => Response.StatusCode = value;
+            get => _statusCode;
+            set
+            {
+                if (!Sent)
+                {
+                    _statusCode = value;
+                    Response.StatusCode = value;
+                }
+            }
         }
 
+        private long _contentLength = 0;
         public long ContentLength64
         {
-            get => (Response.ContentLength.HasValue ? Response.ContentLength.Value : 0);
-            set => Response.ContentLength = value;
+            get => _contentLength;
+            set
+            {
+                if (!Sent)
+                {
+                    _contentLength = value;
+                    Response.ContentLength = value;
+                }
+            }
         }
 
+        private string _contentType = string.Empty;
         public string ContentType
         {
-            get => Response.ContentType;
-            set => Response.ContentType = value;
+            get => _contentType;
+            set
+            {
+                if (!Sent)
+                {
+                    _contentType = value;
+                    Response.ContentType = value;
+                }
+            }
         }
 
-        public Stream OutputStream => Response.Body;
+        public bool Sent => Response.HasStarted;
+
+        public Stream OutputStream { get; private set; }
         public PodeResponseHeaders Headers { get; private set; }
 
         public string StatusDescription { get; set; }
@@ -37,12 +63,14 @@ namespace PodeKestrel
         {
             Response = response;
             Context = context;
+            OutputStream = Response.Body;
             Headers = new PodeResponseHeaders(response.Headers);
         }
 
         public void Close()
         {
             Response.Body.Dispose();
+            OutputStream = null;
         }
 
     }
