@@ -1,9 +1,8 @@
 # Pode.Kestrel
 
-This is the Kestrel Listener for the [Pode](https://github.com/Badgerati/Pode) PowerShell web server. The Kestrel listener, at present, only support HTTP/HTTPS.
+This is the Kestrel Listener for the [Pode](https://github.com/Badgerati/Pode) PowerShell web server. The Kestrel listener, at present, only supports HTTP/HTTPS.
 
-> This listener only works with Pode 2.0+ and PowerShell 6.0+
-
+> This listener only works with Pode v2.5.0+ and PowerShell 6.0+
 
 ## Usage
 

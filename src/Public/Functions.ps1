@@ -8,12 +8,11 @@ function New-PodeKestrelListener
         [System.Threading.CancellationToken]
         $CancellationToken,
 
-        [Parameter(Mandatory=$true)]
-        [PodeListenerType]
+        [Parameter()]
         $Type
     )
 
-    return [PodeListener]::new($CancellationToken, $Type)
+    return [PodeListener]::new($CancellationToken)
 }
 
 function New-PodeKestrelListenerSocket
@@ -31,6 +30,9 @@ function New-PodeKestrelListenerSocket
         [Parameter()]
         [System.Security.Authentication.SslProtocols]
         $SslProtocols,
+
+        [Parameter()]
+        $Type,
 
         [Parameter()]
         [X509Certificate]
