@@ -23,7 +23,13 @@ namespace PodeKestrel
         public CancellationToken CancellationToken { get; private set; }
 
         private IList<PodeSocket> Sockets;
+
         private BlockingCollection<PodeContext> Contexts;
+        public int ContextsCount
+        {
+            get => Contexts.Count;
+        }
+
         private WebHostBuilder WebBuilder;
         private IWebHost WebHost;
 
