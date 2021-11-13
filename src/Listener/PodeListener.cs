@@ -19,11 +19,17 @@ namespace PodeKestrel
         public bool IsListening { get; private set; }
         public bool IsDisposed { get; private set; }
         public bool ErrorLoggingEnabled { get; set; }
+        public string[] ErrorLoggingLevels { get; set; }
         public CancellationToken CancellationToken { get; private set; }
-        public PodeListenerType Type { get; private set; }
 
         private IList<PodeSocket> Sockets;
+
         private BlockingCollection<PodeContext> Contexts;
+        public int ContextsCount
+        {
+            get => Contexts.Count;
+        }
+
         private WebHostBuilder WebBuilder;
         private IWebHost WebHost;
 
@@ -47,11 +53,10 @@ namespace PodeKestrel
             }
         }
 
-        public PodeListener(CancellationToken cancellationToken, PodeListenerType type = PodeListenerType.Http)
+        public PodeListener(CancellationToken cancellationToken)
         {
             CancellationToken = cancellationToken;
             IsDisposed = false;
-            Type = type;
 
             WebBuilder = new WebHostBuilder();
 

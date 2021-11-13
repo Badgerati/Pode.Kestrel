@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace PodeKestrel
@@ -6,19 +7,19 @@ namespace PodeKestrel
     public class PodeHelpers
     {
 
-        public static void WriteException(Exception ex, PodeListener listener = default(PodeListener))
+        public static void WriteException(Exception ex, PodeListener listener = default(PodeListener), PodeLoggingLevel level = PodeLoggingLevel.Error)
         {
             if (ex == default(Exception))
             {
                 return;
             }
 
-            if (listener != default(PodeListener) && !listener.ErrorLoggingEnabled)
+            if (listener != default(PodeListener) && (!listener.ErrorLoggingEnabled || !listener.ErrorLoggingLevels.Contains(level.ToString(), StringComparer.InvariantCultureIgnoreCase)))
             {
                 return;
             }
 
-            Console.WriteLine(ex.Message);
+            Console.WriteLine($"[{level}] {ex.GetType().Name}: {ex.Message}");
             Console.WriteLine(ex.StackTrace);
         }
 
